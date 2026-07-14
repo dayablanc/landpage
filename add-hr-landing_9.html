@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADD HR · Servicios Profesionales</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F6F7F0;
+            color: #133062;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: #F6F7F0;
+            color: #3D0910;
+            padding: 3rem 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 3px solid #C8899F;
+        }
+
+        header h1 {
+            font-family: 'EB Garamond', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            margin-top: 1rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            position: relative;
+            padding-top: 1.5rem;
+        }
+
+        header h1:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background-color: #C8899F;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            max-width: 500px;
+            margin: 0 auto;
+            font-weight: 400;
+            text-align: justify;
+        }
+
+        /* Contenedor principal */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Sección de paquetes */
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-family: 'EB Garamond', serif;
+            font-size: 1.8rem;
+            color: #5A0E1A;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #3D0910;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* Tarjetas de paquetes */
+        .packages {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .package-card {
+            background: #FFFFFF;
+            border-left: 5px solid #3D0910;
+            padding: 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease;
+        }
+
+        .package-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(90, 14, 26, 0.15);
+        }
+
+        .package-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .package-name {
+            font-family: 'EB Garamond', serif;
+            font-size: 1.3rem;
+            color: #5A0E1A;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .package-price {
+            background: #3D0910;
+            color: #FFFFFF;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            white-space: nowrap;
+        }
+
+        .package-content {
+            margin-bottom: 1.5rem;
+        }
+
+        .package-content ul {
+            list-style: none;
+            margin: 0.5rem 0;
+        }
+
+        .package-content li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .package-content li:before {
+            content: "•";
+            color: #3D0910;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        /* Servicios individuales */
+        .service-card {
+            background: #FFFFFF;
+            padding: 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1.2rem;
+            border-top: 3px solid #5A0E1A;
+            transition: transform 0.2s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(90, 14, 26, 0.15);
+        }
+
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .service-name {
+            font-family: 'EB Garamond', serif;
+            font-size: 1.2rem;
+            color: #5A0E1A;
+            font-weight: 700;
+        }
+
+        .service-price {
+            background: #5A0E1A;
+            color: #FFFFFF;
+            padding: 0.4rem 0.9rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .service-description {
+            font-size: 0.95rem;
+            color: #4A5578;
+            line-height: 1.6;
+            margin-bottom: 0.8rem;
+        }
+
+        .service-description ul {
+            list-style: none;
+            margin-left: 0;
+            padding-left: 1.5rem;
+        }
+
+        .service-description li {
+            padding: 0.3rem 0;
+            position: relative;
+        }
+
+        .service-description li:before {
+            content: "•";
+            color: #3D0910;
+            font-weight: bold;
+            position: absolute;
+            left: -1.5rem;
+        }
+
+        /* Botones */
+        .cta-button {
+            display: inline-block;
+            background: #3D0910;
+            color: #FFFFFF;
+            padding: 0.7rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            border: 2px solid #3D0910;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .cta-button:hover {
+            background: #C8899F;
+            border-color: #C8899F;
+        }
+
+        .cta-button-primary {
+            background: #5A0E1A;
+            border-color: #5A0E1A;
+            margin-top: 1rem;
+            padding: 0.9rem 2rem;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .cta-button-primary:hover {
+            background: #8B2535;
+            border-color: #8B2535;
+        }
+
+        /* Toggle de Moneda */
+        .currency-toggle {
+            display: flex;
+            gap: 0.5rem;
+            position: fixed;
+            top: 1rem;
+            right: 1.5rem;
+            z-index: 1000;
+            background: #FFFFFF;
+            padding: 0.4rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .currency-btn {
+            background: #FFFFFF;
+            color: #3D0910;
+            border: 1px solid #3D0910;
+            padding: 0.3rem 0.6rem;
+            border-radius: 3px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .currency-btn:hover {
+            background: #F6F7F0;
+        }
+
+        .currency-btn.active {
+            background: #3D0910;
+            color: #FFFFFF;
+        }
+
+        .service-price-inline {
+            font-weight: 600;
+            color: #3D0910;
+        }
+
+        /* Paquetes Desplegables */
+        .package-summary {
+            font-size: 0.95rem;
+            color: #4A5578;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .package-full-content {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .package-full-content.show {
+            display: block;
+        }
+
+        .see-more {
+            color: #3D0910;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            user-select: none;
+        }
+
+        .see-more:hover {
+            text-decoration: underline;
+        }
+
+        .service-summary {
+            font-size: 0.95rem;
+            color: #4A5578;
+            line-height: 1.6;
+        }
+
+        .service-full-content {
+            display: none;
+        }
+
+        .service-full-content.show {
+            display: block;
+        }
+
+        .see-less {
+            color: #3D0910;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            user-select: none;
+            display: block;
+            margin-top: 1rem;
+        }
+
+        .see-less:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            background: #3D0910;
+            color: #FFFFFF;
+            text-align: center;
+            padding: 2rem 1.5rem;
+            font-size: 0.9rem;
+            margin-top: 3rem;
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+        }
+
+        .footer-email {
+            color: #C8899F;
+            font-weight: 600;
+        }
+
+        .footer-whatsapp {
+            color: #85C2FF;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.6rem;
+            }
+
+            header p {
+                font-size: 0.9rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .package-name, .service-name {
+                font-size: 1.1rem;
+            }
+
+            .package-header, .service-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .package-price, .service-price {
+                align-self: flex-start;
+            }
+        }
+
+        /* Espaciador */
+        .spacer {
+            height: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>Dayana Blanco - ADD HR</h1>
+        <p>Hola, soy Daya ¡me emociona que estés aquí! En esta página encuentras mis servicios diseñados para ubicarte en el empleo de tus sueños y potenciar tu carrera. Explora cada opción, elige la que necesitas y contacta conmigo para comenzar ✨</p>
+    </header>
+
+    <!-- Contenido -->
+    <div class="container">
+        <!-- Toggle de Moneda -->
+        <div class="currency-toggle">
+            <button class="currency-btn active" data-currency="CRC">CRC</button>
+            <button class="currency-btn" data-currency="USD">USD</button>
+        </div>
+        <!-- PAQUETES -->
+        <section class="section">
+            <h2 class="section-title">💼 Paquetes</h2>
+            <div class="packages">
+                <!-- The Starter -->
+                <div class="package-card">
+                    <div class="package-header">
+                        <div class="package-name">⭐ The Starter</div>
+                        <div class="package-price" data-crc="19500" data-usd="39">₡19 500</div>
+                    </div>
+                    <div class="package-content">
+                        <div class="package-summary">
+                            En esta sesión te preparo para entender cómo funcionan los filtros ATS y dejar una excelente primera impresión. Te enseño todo lo que necesitas saber sobre CVs estratégicos, portales de empleo y cómo LinkedIn es tu mejor aliado para atraer oportunidades. <span class="see-more" onclick="togglePackage(this)">Ver más</span>
+                        </div>
+                        <div class="package-full-content">
+                            <p style="font-size: 0.9rem; color: #4A5578; margin-bottom: 1rem;"><strong>Incluye:</strong></p>
+                            <ul>
+                                <li>Diagnóstico completo de tu experiencia, fortalezas y objetivos profesionales</li>
+                                <li>Creación de CV profesional en formato Harvard, 100% optimizado para filtros ATS</li>
+                                <li>Estrategia de adaptación de CV usando herramientas de AI</li>
+                                <li>Recomendación personalizada de plataformas de reclutamiento por perfil</li>
+                                <li>Preparación para prescreenings: cómo responder estratégicamente</li>
+                                <li>Guía práctica de optimización de LinkedIn para atraer oportunidades</li>
+                                <li>🎯 Ideal para: Iniciar tu proceso de búsqueda o pulir tu candidatura</li>
+                            </ul>
+                            <span class="see-less" onclick="togglePackage(this)">Ver menos</span>
+                        </div>
+                    </div>
+                    <a href="https://wa.me/50689069915?text=Hola%20Daya%2C%20me%20interesa%20el%20paquete%20The%20Starter" class="cta-button">Agendar</a>
+                </div>
+
+                <!-- The Interviewee -->
+                <div class="package-card">
+                    <div class="package-header">
+                        <div class="package-name">💬 The Interviewee</div>
+                        <div class="package-price" data-crc="22000" data-usd="44">₡22 000</div>
+                    </div>
+                    <div class="package-content">
+                        <div class="package-summary">
+                            Te preparo completamente para entrevistas. Te enseño la técnica STAR para responder cualquier pregunta con seguridad, practicamos juntos en una simulación real, y te doy un manual con preguntas frecuentes y respuestas estructuradas. Sales listo para impresionar. <span class="see-more" onclick="togglePackage(this)">Ver más</span>
+                        </div>
+                        <div class="package-full-content">
+                            <p style="font-size: 0.9rem; color: #4A5578; margin-bottom: 1rem;"><strong>Incluye:</strong></p>
+                            <ul>
+                                <li>Técnica STAR: cómo responder preguntas conductuales con seguridad y ejemplos reales</li>
+                                <li>Preparación estratégica para prescreenings y primeras entrevistas</li>
+                                <li>Guía completa en formato PDF con preguntas frecuentes y estructura de respuestas</li>
+                                <li>Ejercicios prácticos para dominar diferentes tipos de preguntas</li>
+                                <li>30 minutos de simulación real como reclutador</li>
+                                <li>Feedback inmediato y consejos para mejorar tu desempeño</li>
+                                <li>🎯 Ideal para: Ganar confianza antes de entrevistas importantes</li>
+                            </ul>
+                            <span class="see-less" onclick="togglePackage(this)">Ver menos</span>
+                        </div>
+                    </div>
+                    <a href="https://wa.me/50689069915?text=Hola%20Daya%2C%20me%20interesa%20el%20paquete%20The%20Interviewee" class="cta-button">Agendar</a>
+                </div>
+
+                <!-- The Rocket -->
+                <div class="package-card">
+                    <div class="package-header">
+                        <div class="package-name">🚀 The Rocket</div>
+                        <div class="package-price" data-crc="33500" data-usd="67">₡33 500</div>
+                    </div>
+                    <div class="package-content">
+                        <div class="package-summary">
+                            Este es el paquete completo. Optimizamos tu CV desde cero, perfeccionamos tu LinkedIn, te preparo estratégicamente para prescreenings y entrevistas, hacemos simulaciones prácticas, y te acompaño en todo el proceso. Es tu transformación profesional total. <span class="see-more" onclick="togglePackage(this)">Ver más</span>
+                        </div>
+                        <div class="package-full-content">
+                            <p style="font-size: 0.9rem; color: #4A5578; margin-bottom: 1rem;"><strong>Incluye todo para tu transformación profesional:</strong></p>
+                            <ul>
+                                <li>Modificación y optimización completa de tu CV actual</li>
+                                <li>Diagnóstico profundo de tu experiencia, fortalezas y objetivos</li>
+                                <li>CV profesional en formato Harvard, 100% optimizado para filtros ATS</li>
+                                <li>Estrategia de adaptación de CV usando herramientas de AI</li>
+                                <li>Optimización completa de LinkedIn con perfil profesional y atractivo</li>
+                                <li>Preparación estratégica para prescreenings</li>
+                                <li>Técnica STAR para responder preguntas conductuales</li>
+                                <li>Guía completa de entrevistas con preguntas y ejercicios prácticos</li>
+                                <li>Simulación de entrevista con feedback inmediato</li>
+                                <li>Seguimiento y soporte post-sesión</li>
+                                <li>🎯 Ideal para: Transformación total, cambio de carrera, o candidatos competitivos</li>
+                            </ul>
+                            <span class="see-less" onclick="togglePackage(this)">Ver menos</span>
+                        </div>
+                    </div>
+                    <a href="https://wa.me/50689069915?text=Hola%20Daya%2C%20me%20interesa%20el%20paquete%20The%20Rocket" class="cta-button">Agendar</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SERVICIOS INDIVIDUALES -->
+        <section class="section">
+            <h2 class="section-title">✨ Servicios Individuales</h2>
+
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-name">📝 Modificación de CV</div>
+                    <div class="service-price" data-crc="10000" data-usd="20">₡10 000</div>
+                </div>
+                <div class="service-description">
+                    <div class="service-summary">
+                        Tu CV actual no te está llevando a donde quieres. Lo optimizamos para que pase filtros ATS, mejoramos el contenido para que destaque, y lo entregas listo para enviar a procesos de selección. <span class="see-more" onclick="toggleService(this)">Ver más</span>
+                    </div>
+                    <div class="service-full-content">
+                        <ul style="margin-top: 1rem;">
+                            <li>Optimización estratégica en formato compatible con filtros ATS</li>
+                            <li>Corrección y mejora del contenido para mayor impacto</li>
+                            <li>Entrega en Word editable para futuras actualizaciones</li>
+                            <li>Ideales para: CV antiguos, poco competitivos o que no pasan filtros</li>
+                        </ul>
+                        <span class="see-less" onclick="toggleService(this)">Ver menos</span>
+                    </div>
+                </div>
+                <a href="https://wa.me/50689069915?text=Hola%20Daya%2C%20me%20interesa%20Modificaci%C3%B3n%20de%20CV" class="cta-button">Agendar</a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-name">📄 Creación de CV</div>
+                    <div class="service-price" data-crc="18000" data-usd="36">₡18 000</div>
+                </div>
+                <div class="service-description">
+                    <div class="service-summary">
+                        Si no tienes CV o quieres empezar desde cero, esta es tu sesión. Conversamos sobre tu experiencia, tus logros, y creamos un CV profesional en formato Harvard optimizado para reclutadores y filtros ATS. <span class="see-more" onclick="toggleService(this)">Ver más</span>
+                    </div>
+                    <div class="service-full-content">
+                        <ul style="margin-top: 1rem;">
+                            <li>Sesión 1:1 de 30 min para conocer tu perfil y experiencia</li>
+                            <li>Recopilación estratégica de información y logros profesionales</li>
+                            <li>Creación colaborativa de CV en formato Harvard, optimizado para ATS</li>
+                            <li>Archivo Word listo para enviar a procesos de selección</li>
+                            <li>Ideales para: primeros CV, cambios de carrera, o perfiles sin estructura previa</li>
+                        </ul>
+                        <span class="see-less" onclick="toggleService(this)">Ver menos</span>
+                    </div>
+                </div>
+                <a href="https://wa.me/50689069915?text=Hola%20Daya%2C%20me%20interesa%20Creaci%C3%B3n%20de%20CV" class="cta-button">Agendar</a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-name">💼 Optimización de LinkedIn</div>
+                    <div class="service-price" data-crc="18000" data-usd="36">₡18 000</div>
+                </div>
+                <div class="service-description">
+                    <div class="service-summary">
+                        Tu LinkedIn es tu carta de presentación profesional. Te enseño cómo completar tu perfil correctamente, qué escribir en el resumen, cómo atraer a reclutadores y posicionarte como un candidato competitivo. <span class="see-more" onclick="toggleService(this)">Ver más</span>
+                    </div>
+                    <div class="service-full-content">
+                        <ul style="margin-top: 1rem;">
+                            <li>Sesión 1:1 de 30 min enfocada en estrategia de LinkedIn</li>
+                            <li>Auditoría completa de tu perfil actual</li>
+                            <li>Optimización de titular, resumen y experiencia laboral</li>
+                            <li>Consejo estratégico para atraer más oportunidades</li>
+                            <li>Perfil completo, profesional y atractivo para reclutadores</li>
+                            <li><strong>Requisito:</strong> Tener cuenta de LinkedIn creada</li>
+                            <li>Ideales para: Perfiles incompletos, aumentar visibilidad, atraer oportunidades</li>
+                        </ul>
+                        <span class="see-less" onclick="toggleService(this)">Ver menos</span>
+                    </div>
+                </div>
+                <a href="https://wa.me/50689069915?text=Hola%20Daya%2C%20me%20interesa%20Optimizaci%C3%B3n%20de%20LinkedIn" class="cta-button">Agendar</a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-name">🎤 Simulación de Entrevistas</div>
+                    <div class="service-price" data-crc="15000" data-usd="30">₡15 000 / ₡28 000</div>
+                </div>
+                <div class="service-description">
+                    <div class="service-summary">
+                        Te simulo una entrevista real como si fuera un reclutador activo. Te hago preguntas desafiantes, recibes feedback inmediato, y sales sabiendo exactamente en qué mejorar y con más confianza para tu entrevista real. <span class="see-more" onclick="toggleService(this)">Ver más</span>
+                    </div>
+                    <div class="service-full-content">
+                        <ul style="margin-top: 1rem;">
+                            <li>Sesión 1:1 donde simulamos ser reclutadores en un proceso real</li>
+                            <li>Preguntas desafiantes y conductuales para prepararte</li>
+                            <li>Feedback inmediato y constructivo en la llamada</li>
+                            <li>Técnicas para mejorar tus respuestas y seguridad</li>
+                            <li>Gana confianza antes de tu entrevista real</li>
+                        </ul>
+                        <p style="margin-top: 1rem; color: #5A0E1A;"><strong>Opciones disponibles:</strong></p>
+                        <ul style="margin-top: 0.5rem;">
+                            <li>1 sesión de 30 min: <span class="service-price-inline" data-crc="15000" data-usd="30">₡15 000</span></li>
+                            <li>2 sesiones de 30 min: <span class="service-price-inline" data-crc="28000" data-usd="56">₡28 000</span></li>
+                        </ul>
+                        <p style="margin-top: 1rem; color: #666;"><em>Nota: Comparte tu CV o una vacante específica para un enfoque más personalizado.</em></p>
+                        <span class="see-less" onclick="toggleService(this)">Ver menos</span>
+                    </div>
+                </div>
+                <a href="https://wa.me/50689069915?text=Hola%20Daya%2C%20me%20interesa%20Simulaci%C3%B3n%20de%20Entrevistas" class="cta-button">Agendar</a>
+            </div>
+        </section>
+
+        <div class="spacer"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p><strong>Dayana Blanco - ADD HR</strong></p>
+        <p>Servicios profesionales de carrera y recursos humanos</p>
+        <p>📧 Correo: <span class="footer-email">info@addhrlatam</span></p>
+        <p>📱 WhatsApp: <span class="footer-whatsapp">+506 8906 9915</span></p>
+    </footer>
+
+    <script>
+        // Función para desplegar/contraer paquetes
+        function togglePackage(element) {
+            const packageCard = element.closest('.package-card');
+            const packageSummary = packageCard.querySelector('.package-summary');
+            const fullContent = packageCard.querySelector('.package-full-content');
+            const seeMore = packageSummary.querySelector('.see-more');
+            
+            fullContent.classList.toggle('show');
+            
+            if (fullContent.classList.contains('show')) {
+                // Cuando se abre: ocultar "Ver más" del resumen
+                seeMore.style.display = 'none';
+            } else {
+                // Cuando se cierra: mostrar "Ver más" del resumen
+                seeMore.style.display = 'inline';
+            }
+        }
+
+        // Función para desplegar/contraer servicios
+        function toggleService(element) {
+            const serviceCard = element.closest('.service-card');
+            const serviceDescription = serviceCard.querySelector('.service-description');
+            const fullContent = serviceCard.querySelector('.service-full-content');
+            const seeMor = serviceDescription.querySelector('.see-more');
+            
+            fullContent.classList.toggle('show');
+            
+            if (fullContent.classList.contains('show')) {
+                // Cuando se abre: ocultar "Ver más" del resumen
+                seeMor.style.display = 'none';
+            } else {
+                // Cuando se cierra: mostrar "Ver más" del resumen
+                seeMor.style.display = 'inline';
+            }
+        }
+
+        // Toggle de moneda
+        document.querySelectorAll('.currency-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const currency = btn.dataset.currency;
+                
+                // Actualizar botones activos
+                document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Actualizar todos los precios
+                document.querySelectorAll('[data-crc][data-usd]').forEach(priceEl => {
+                    if (currency === 'USD') {
+                        priceEl.textContent = '$' + priceEl.dataset.usd;
+                    } else {
+                        priceEl.textContent = '₡' + parseInt(priceEl.dataset.crc).toLocaleString('es-CR');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
