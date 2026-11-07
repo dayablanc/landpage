@@ -9,7 +9,12 @@
 //                                  verifique este webhook una vez al configurarlo
 //   WHATSAPP_ACCESS_TOKEN       - access token de la app de Meta (System User token)
 //   WHATSAPP_PHONE_NUMBER_ID    - ID del número de WhatsApp conectado a la Cloud API
-//   DAYANA_NOTIFY_NUMBER        - número de WhatsApp de Dayana para avisos, formato E.164 sin "+"
+//   DAYANA_NOTIFY_NUMBER        - número personal de Dayana para avisos, formato E.164 sin "+".
+//                                  Sus propios mensajes al bot no se registran como lead.
+//   NOTIFY_TEMPLATE_NAME        - (opcional) nombre de la plantilla aprobada en Meta para los
+//                                  avisos (ej. "aviso_lead", idioma "es"). Sin ella el aviso va
+//                                  como texto libre y solo llega si Dayana le escribió al bot en
+//                                  las últimas 24 h (regla de WhatsApp).
 //   GOOGLE_SERVICE_ACCOUNT_JSON - contenido completo del JSON de la cuenta de servicio de Google
 //   LEADS_SHEET_ID              - ID del spreadsheet "ADD HR · Tracker de Leads"
 //
@@ -35,6 +40,52 @@ async function sendWhatsAppMessage(to, text) {
   });
   if (!res.ok) {
     console.error('Error enviando WhatsApp:', await res.text());
+  }
+}
+
+// Plantilla "aviso_lead" en Meta (idioma "Spanish", código es): "Aviso de ADD HR: tienes un
+// {{1}} de {{2}} (número {{3}}). Esto fue lo que escribió: "{{4}}". Revisa el tracker de leads
+// para darle seguimiento hoy." Los parámetros de plantilla no aceptan saltos de
+// línea ni más de 4 espacios seguidos, por eso se limpian.
+async function notifyDayana(kind, contactName, from, text) {
+  const to = String(process.env.DAYANA_NOTIFY_NUMBER || '').replace(/\D/g, '');
+  if (!to) return;
+  const template = process.env.NOTIFY_TEMPLATE_NAME;
+  const freeText = `🔔 Tienes un ${kind} de ${contactName} (${from}):\n"${text}"\n\nRevisa el tracker de leads para darle seguimiento.`;
+  if (!template) {
+    await sendWhatsAppMessage(to, freeText);
+    return;
+  }
+  const clean = (value, max) => String(value).replace(/\s+/g, ' ').trim().slice(0, max);
+  const res = await fetch(`${GRAPH_API}/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to,
+      type: 'template',
+      template: {
+        name: template,
+        language: { code: 'es' },
+        components: [
+          {
+            type: 'body',
+            parameters: [kind, contactName, from, text].map((value, i) => ({
+              type: 'text',
+              text: clean(value, i === 3 ? 500 : 60),
+            })),
+          },
+        ],
+      },
+    }),
+  });
+  if (!res.ok) {
+    // Respaldo: el texto libre solo llega si Dayana le escribió al bot en las últimas 24 h
+    console.error('Error enviando aviso a Dayana:', await res.text());
+    await sendWhatsAppMessage(to, freeText);
   }
 }
 
@@ -121,6 +172,11 @@ module.exports = async (req, res) => {
     const text = message.text?.body || '[mensaje sin texto: audio, imagen u otro adjunto]';
     const now = new Date().toISOString();
 
+    // Los mensajes de Dayana al bot (por ejemplo, para abrir la ventana de 24 h) no son leads
+    if (from === String(process.env.DAYANA_NOTIFY_NUMBER || '').replace(/\D/g, '')) {
+      return res.status(200).send('OK');
+    }
+
     // Si Google falla, se saluda igual: es preferible un saludo repetido a un lead sin respuesta
     let googleToken = null;
     try {
@@ -130,12 +186,7 @@ module.exports = async (req, res) => {
     }
 
     if (googleToken && (await isKnownLead(googleToken, from))) {
-      if (process.env.DAYANA_NOTIFY_NUMBER) {
-        await sendWhatsAppMessage(
-          process.env.DAYANA_NOTIFY_NUMBER,
-          `💬 ${contactName} (${from}) escribió de nuevo:\n"${text}"`
-        );
-      }
+      await notifyDayana('mensaje de seguimiento', contactName, from, text);
       return res.status(200).send('OK');
     }
 
@@ -156,12 +207,7 @@ module.exports = async (req, res) => {
       from,
     ]);
 
-    if (process.env.DAYANA_NOTIFY_NUMBER) {
-      await sendWhatsAppMessage(
-        process.env.DAYANA_NOTIFY_NUMBER,
-        `🔔 Nuevo lead en WhatsApp: ${contactName} (${from})\n"${text}"\n\nYa le respondí el saludo automático. Revisa el tracker para seguir tú.`
-      );
-    }
+    await notifyDayana('nuevo lead (ya recibió el saludo)', contactName, from, text);
 
     return res.status(200).send('OK');
   } catch (err) {
