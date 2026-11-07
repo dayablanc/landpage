@@ -162,11 +162,53 @@ async function appendRow(token, tab, cols, row) {
 }
 
 const MENSAJE_BIENVENIDA =
-  '¡Hola! Soy el asistente de Daya (ADD HR) 👋 Ya recibí tu mensaje y en breve te ' +
-  'estaremos escribiendo personalmente. Mientras tanto, cuéntame rápido: ¿cuál es tu ' +
+  '¡Hola! Soy el asistente de Daya (ADD HR) 👋 Ya recibimos tu mensaje y en breve te ' +
+  'estaremos escribiendo personalmente. Mientras tanto, cuéntanos rápido: ¿cuál es tu ' +
   'situación actual? (por ejemplo: "llevo 2 meses sin empleo", "tengo entrevista la ' +
   'próxima semana", "busco mi primer empleo"). Así te recomendamos el paquete que mejor ' +
   'te sirve.';
+
+const MENSAJE_BIENVENIDA_EN =
+  'Hi! I\'m Daya\'s assistant (ADD HR) 👋 We got your message and we\'ll get back to you ' +
+  'personally very soon. In the meantime, tell us a bit about your situation (for example: ' +
+  '"I\'ve been job hunting for 2 months", "I have an interview next week", "I\'m planning a ' +
+  'career change"). That way we can recommend the package that fits you best.';
+
+const LINK_PRECIOS =
+  '\n\nRecuerda que también puedes ver los paquetes con el detalle completo y precios aquí:\n' +
+  'https://dayablancohr.vercel.app';
+
+// Todos los números +1 (EE. UU., Canadá, Puerto Rico, Caribe) pagan precios distintos a los
+// de la página, así que no reciben el link
+function hasDifferentPricing(phone) {
+  return phone.startsWith('1');
+}
+
+const SPANISH_WORDS = ['hola', 'buenas', 'buenos', 'quiero', 'quisiera', 'necesito', 'informacion',
+  'precio', 'precios', 'cuanto', 'cuesta', 'gracias', 'ayuda', 'trabajo', 'empleo', 'paquete',
+  'interesa', 'tengo', 'busco', 'entrevista', 'favor', 'consulta', 'dias', 'tardes', 'noches', 'como',
+  'para', 'que', 'mi', 'una', 'estoy'];
+const ENGLISH_WORDS = ['hi', 'hello', 'hey', 'i', 'im', 'need', 'want', 'would', 'help', 'job',
+  'resume', 'interview', 'price', 'prices', 'thanks', 'thank', 'please', 'looking', 'information',
+  'how', 'much', 'the', 'my', 'is', 'am', 'have', 'good', 'morning', 'afternoon', 'evening', 'you'];
+
+// Idioma del mensaje por palabras comunes; si no se puede saber (empate, audio), se usa el país
+function detectLanguage(text, phone) {
+  // ñ ¿ ¡ solo existen en español; una vocal con tilde suma un voto (en inglés aparece en "résumé")
+  if (/[ñ¿¡]/i.test(text)) return 'es';
+  const words = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f']/g, '').match(/[a-z]+/g) || [];
+  const es = words.filter((w) => SPANISH_WORDS.includes(w)).length + (/[áéíóú]/i.test(text) ? 1 : 0);
+  const en = words.filter((w) => ENGLISH_WORDS.includes(w)).length;
+  if (es > en) return 'es';
+  if (en > es) return 'en';
+  return hasDifferentPricing(phone) ? 'en' : 'es';
+}
+
+function buildGreeting(text, phone) {
+  // La página de precios está en español: solo se enlaza en el saludo en español
+  if (detectLanguage(text, phone) === 'en') return MENSAJE_BIENVENIDA_EN;
+  return hasDifferentPricing(phone) ? MENSAJE_BIENVENIDA : MENSAJE_BIENVENIDA + LINK_PRECIOS;
+}
 
 module.exports = async (req, res) => {
   // Meta llama con GET una sola vez para verificar el webhook al configurarlo
@@ -191,6 +233,11 @@ module.exports = async (req, res) => {
 
     if (!message) {
       // Eventos que no son mensajes entrantes (confirmaciones de entrega, etc.)
+      return res.status(200).send('OK');
+    }
+
+    // Mensajes que llegan desde un grupo: sin respuesta automática ni registro como lead
+    if (message.group_id || change?.metadata?.group_id || message.context?.group_id) {
       return res.status(200).send('OK');
     }
 
@@ -224,10 +271,12 @@ module.exports = async (req, res) => {
       return res.status(200).send('OK');
     }
 
-    await sendWhatsAppMessage(from, MENSAJE_BIENVENIDA);
+    const usClient = hasDifferentPricing(from);
+    const greeting = buildGreeting(message.text?.body || '', from);
+    await sendWhatsAppMessage(from, greeting);
 
     if (googleToken) {
-      await appendRow(googleToken, CONVERSATIONS_TAB, 'A:E', [now, from, contactName, 'Bot', MENSAJE_BIENVENIDA]);
+      await appendRow(googleToken, CONVERSATIONS_TAB, 'A:E', [now, from, contactName, 'Bot', greeting]);
     }
 
     // Fecha límite de seguimiento: mañana; si nadie avanza el lead, la fila se pinta de rojo
@@ -242,7 +291,9 @@ module.exports = async (req, res) => {
       Math.floor(now) + 1,
       'No',
       'No',
-      'Creado automáticamente por el webhook',
+      usClient
+        ? 'Creado automáticamente por el webhook. Número +1 (EE. UU./Canadá/Caribe): precios distintos'
+        : 'Creado automáticamente por el webhook',
       from,
     ]);
 
