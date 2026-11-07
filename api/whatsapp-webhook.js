@@ -43,15 +43,16 @@ async function sendWhatsAppMessage(to, text) {
   }
 }
 
-// Plantilla "aviso_lead" en Meta (idioma "Spanish", código es): "Aviso de ADD HR: tienes un
-// {{1}} de {{2}} (número {{3}}). Esto fue lo que escribió: "{{4}}". Revisa el tracker de leads
-// para darle seguimiento hoy." Los parámetros de plantilla no aceptan saltos de
+// Plantilla "aviso_lead" en Meta (Utilidad, idioma "Spanish", código es): "Tu cuenta de
+// WhatsApp de ADD HR recibió un {{1}} de {{2}} (número {{3}}). Contenido del mensaje: "{{4}}".
+// Revisa el registro de contactos para darle seguimiento." Meta la clasificaba como Marketing
+// con palabras como "lead" o "paquete", por eso el texto es neutro. Los parámetros de plantilla no aceptan saltos de
 // línea ni más de 4 espacios seguidos, por eso se limpian.
 async function notifyDayana(kind, contactName, from, text) {
   const to = String(process.env.DAYANA_NOTIFY_NUMBER || '').replace(/\D/g, '');
   if (!to) return;
   const template = process.env.NOTIFY_TEMPLATE_NAME;
-  const freeText = `🔔 Tienes un ${kind} de ${contactName} (${from}):\n"${text}"\n\nRevisa el tracker de leads para darle seguimiento.`;
+  const freeText = `🔔 Recibiste un ${kind} de ${contactName} (${from}):\n"${text}"\n\nRevisa el registro de contactos para darle seguimiento.`;
   if (!template) {
     await sendWhatsAppMessage(to, freeText);
     return;
@@ -207,7 +208,7 @@ module.exports = async (req, res) => {
       from,
     ]);
 
-    await notifyDayana('nuevo lead (ya recibió el saludo)', contactName, from, text);
+    await notifyDayana('primer mensaje', contactName, from, text);
 
     return res.status(200).send('OK');
   } catch (err) {
