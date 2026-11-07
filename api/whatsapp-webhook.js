@@ -162,10 +162,11 @@ async function appendRow(token, tab, cols, row) {
 }
 
 const MENSAJE_BIENVENIDA =
-  '¡Hola! Soy el asistente de Dayana (ADD HR) 👋 Ya recibí tu mensaje y en breve te ' +
-  'escribe ella personalmente. Mientras tanto, cuéntame rápido: ¿cuál es tu situación ' +
-  'actual? (por ejemplo: "llevo 2 meses sin empleo", "tengo entrevista la próxima ' +
-  'semana", "busco mi primer empleo"). Así Dayana te recomienda el paquete que mejor te sirve.';
+  '¡Hola! Soy el asistente de Daya (ADD HR) 👋 Ya recibí tu mensaje y en breve te ' +
+  'estaremos escribiendo personalmente. Mientras tanto, cuéntame rápido: ¿cuál es tu ' +
+  'situación actual? (por ejemplo: "llevo 2 meses sin empleo", "tengo entrevista la ' +
+  'próxima semana", "busco mi primer empleo"). Así te recomendamos el paquete que mejor ' +
+  'te sirve.';
 
 module.exports = async (req, res) => {
   // Meta llama con GET una sola vez para verificar el webhook al configurarlo
