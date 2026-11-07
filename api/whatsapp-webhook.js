@@ -101,11 +101,25 @@ async function getGoogleAccessToken() {
   return token;
 }
 
+// Pestañas del tracker: no renombrarlas sin cambiar estas constantes
+const LEADS_TAB = 'Leads';
+const CONVERSATIONS_TAB = 'Conversaciones';
+
+// Fechas como número de serie de Sheets en hora de Costa Rica (UTC-6, sin horario de verano),
+// para que el tracker las trate como fechas reales al ordenar, filtrar y sumar
+function sheetsSerial(date) {
+  return (date.getTime() - 6 * 3600 * 1000) / 86400000 + 25569;
+}
+
+function sheetsRange(tab, cols) {
+  return encodeURIComponent(`'${tab}'!${cols}`);
+}
+
 // La columna L del tracker guarda el teléfono; sirve para saber si el número ya escribió antes
 async function isKnownLead(token, phone) {
   const sheetId = process.env.LEADS_SHEET_ID;
   const res = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/L:L`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetsRange(LEADS_TAB, 'L:L')}`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
   if (!res.ok) {
@@ -116,10 +130,23 @@ async function isKnownLead(token, phone) {
   return values.some(([cell]) => String(cell || '').replace(/\D/g, '') === phone);
 }
 
-async function appendLeadRow(token, row) {
+// Meta puede reenviar el mismo mensaje si tardamos en responder; la columna F de
+// Conversaciones guarda el id de cada mensaje para no procesarlo dos veces
+async function isDuplicateMessage(token, messageId) {
   const sheetId = process.env.LEADS_SHEET_ID;
   const res = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A:L:append?valueInputOption=RAW`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetsRange(CONVERSATIONS_TAB, 'F:F')}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!res.ok) return false;
+  const { values = [] } = await res.json();
+  return values.some(([cell]) => cell === messageId);
+}
+
+async function appendRow(token, tab, cols, row) {
+  const sheetId = process.env.LEADS_SHEET_ID;
+  const res = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetsRange(tab, cols)}:append?valueInputOption=RAW`,
     {
       method: 'POST',
       headers: {
@@ -130,7 +157,7 @@ async function appendLeadRow(token, row) {
     }
   );
   if (!res.ok) {
-    console.error('Error escribiendo en el tracker de leads:', await res.text());
+    console.error(`Error escribiendo en la pestaña ${tab} del tracker:`, await res.text());
   }
 }
 
@@ -171,7 +198,7 @@ module.exports = async (req, res) => {
     const from = message.from;
     const contactName = change?.contacts?.[0]?.profile?.name || 'Sin nombre';
     const text = message.text?.body || '[mensaje sin texto: audio, imagen u otro adjunto]';
-    const now = new Date().toISOString();
+    const now = sheetsSerial(new Date());
 
     // Los mensajes de Dayana al bot (por ejemplo, para abrir la ventana de 24 h) no son leads
     if (from === String(process.env.DAYANA_NOTIFY_NUMBER || '').replace(/\D/g, '')) {
@@ -186,6 +213,13 @@ module.exports = async (req, res) => {
       console.error('Error autenticando con Google:', err);
     }
 
+    if (googleToken) {
+      if (await isDuplicateMessage(googleToken, message.id)) {
+        return res.status(200).send('OK');
+      }
+      await appendRow(googleToken, CONVERSATIONS_TAB, 'A:F', [now, from, contactName, 'Cliente', text, message.id]);
+    }
+
     if (googleToken && (await isKnownLead(googleToken, from))) {
       await notifyDayana('mensaje de seguimiento', contactName, from, text);
       return res.status(200).send('OK');
@@ -193,15 +227,20 @@ module.exports = async (req, res) => {
 
     await sendWhatsAppMessage(from, MENSAJE_BIENVENIDA);
 
-    if (googleToken) await appendLeadRow(googleToken, [
+    if (googleToken) {
+      await appendRow(googleToken, CONVERSATIONS_TAB, 'A:E', [now, from, contactName, 'Bot', MENSAJE_BIENVENIDA]);
+    }
+
+    // Fecha límite de seguimiento: mañana; si nadie avanza el lead, la fila se pinta de rojo
+    if (googleToken) await appendRow(googleToken, LEADS_TAB, 'A:L', [
       now,
       contactName,
       'WhatsApp',
       text,
       '',
-      'Contactado (auto)',
+      'Nuevo',
       'Dayana revisa y recomienda paquete',
-      '',
+      Math.floor(now) + 1,
       'No',
       'No',
       'Creado automáticamente por el webhook',
