@@ -104,6 +104,7 @@ async function getGoogleAccessToken() {
 // Pestañas del tracker: no renombrarlas sin cambiar estas constantes
 const LEADS_TAB = 'Leads';
 const CONVERSATIONS_TAB = 'Conversaciones';
+const DO_NOT_GREET_TAB = 'No saludar';
 
 // Fechas como número de serie de Sheets en hora de Costa Rica (UTC-6, sin horario de verano),
 // para que el tracker las trate como fechas reales al ordenar, filtrar y sumar
@@ -113,6 +114,29 @@ function sheetsSerial(date) {
 
 function sheetsRange(tab, cols) {
   return encodeURIComponent(`'${tab}'!${cols}`);
+}
+
+// México a veces llega como 521 + 10 dígitos y otras como 52 + 10; se comparan sin el 1.
+// Un número de 8 dígitos escrito a mano en el tracker se toma como de Costa Rica.
+function normalizePhone(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (digits.length === 8) return '506' + digits;
+  return digits.length === 13 && digits.startsWith('521') ? '52' + digits.slice(3) : digits;
+}
+
+// Clientes que ya existían antes del bot y familia: el bot no los saluda, no los registra ni avisa
+async function isOnDoNotGreetList(token, phone) {
+  const sheetId = process.env.LEADS_SHEET_ID;
+  const res = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetsRange(DO_NOT_GREET_TAB, 'A:A')}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!res.ok) {
+    console.error('Error leyendo la lista No saludar:', await res.text());
+    return false;
+  }
+  const { values = [] } = await res.json();
+  return values.some(([cell]) => normalizePhone(cell) === normalizePhone(phone));
 }
 
 // La columna L del tracker guarda el teléfono; sirve para saber si el número ya escribió antes
@@ -127,7 +151,7 @@ async function isKnownLead(token, phone) {
     return false;
   }
   const { values = [] } = await res.json();
-  return values.some(([cell]) => String(cell || '').replace(/\D/g, '') === phone);
+  return values.some(([cell]) => normalizePhone(cell) === normalizePhone(phone));
 }
 
 // Meta puede reenviar el mismo mensaje si tardamos en responder; la columna F de
@@ -257,6 +281,10 @@ module.exports = async (req, res) => {
       googleToken = await getGoogleAccessToken();
     } catch (err) {
       console.error('Error autenticando con Google:', err);
+    }
+
+    if (googleToken && (await isOnDoNotGreetList(googleToken, from))) {
+      return res.status(200).send('OK');
     }
 
     if (googleToken) {
