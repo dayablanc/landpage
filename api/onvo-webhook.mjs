@@ -34,7 +34,8 @@ const ONVO_API = 'https://api.onvopay.com/v1';
 const PAGOS_TAB = 'Pagos';
 
 // ONVO espera respuesta en 10 s; cada llamada externa tiene su propio límite para no pasarse
-// (peor caso: 2 s Google + 2 s columna J en paralelo con ONVO + 2 s fila + 3 s correo = 9 s)
+// (peor caso: 2 s Google + 2 s columna J en paralelo con ONVO + 2 s fila + 3 s correo = 9 s,
+// sin contar el arranque en frío de la función)
 const FETCH_TIMEOUT_MS = 2000;
 const NOTIFY_TIMEOUT_MS = 3000;
 
