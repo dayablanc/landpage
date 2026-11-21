@@ -1,8 +1,9 @@
 {
   "name": "landpage-whatsapp-webhook",
   "private": true,
-  "description": "Landing page estática de ADD HR + función serverless del webhook de WhatsApp Cloud API.",
+  "description": "Landing page estática de ADD HR + funciones serverless de los webhooks de WhatsApp Cloud API y ONVO Pay.",
   "dependencies": {
-    "google-auth-library": "^9.0.0"
+    "google-auth-library": "^9.0.0",
+    "nodemailer": "^7.0.7"
   }
 }
